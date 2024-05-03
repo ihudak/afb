@@ -6,7 +6,6 @@ metadata:
 data:
   FITNESS_BOT_SPREADSHEET_URL: "https://docs.google.com/spreadsheets/d/1pe9KsEO1oqhAb0pHY7h-Q9mb_uuz4GtOH-QRNasb1y4/edit#gid=1993409970"
   FITNESS_BOT_ADMIN: "413423581"
-  FITNESS_BOT_TOKEN: '5702428197:AAER1GzamdsbiotIOzQlgQ2TbHx0nTulJCI'
   TENANT_ID: "pae32231"
   TENANT_LAYER: "dev" # dev | sprint
   dt_srv: "dynatracelabs.com" # dynatracelabs.com | dynatrace.com
