@@ -37,12 +37,12 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
             - name: DT_RELEASE_BUILD_VERSION
-              value: "2024-04-07-20:03:11"
+              value: "2024-05-03-21:03:11"
             - name: TENANT_URL
               value: "https://$(TENANT_ID).$(TENANT_LAYER).$(dt_srv)"
             - name: SERVICE_NAME
               value: ArmyFitnessBot
-            - name: SERVICE_FULL_NAME
+            - name: OTEL_SERVICE_NAME
               value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PROJECT),my.resource.attribute=$(MY_ATTR)"

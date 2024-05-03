@@ -16,4 +16,5 @@ data:
   COST_CENTER: "FitnessSales"
   COST_PROJECT: "FitnessBot"
   MY_ATTR: "ArmyFitnessBot-Attr"
-  python_agent_url: "https://artifactory.lab.dynatrace.org/artifactory/agent-pipeline-test-local/com/compuware/apm/oneagentpython/oneagentpython-linux-x86_64-release/1.293.0.20240503-060637/oneagentpython-linux-x86_64-release-1.293.0.20240503-060637.zip"
+  python_native_agent_url: "https://artifactory.lab.dynatrace.org/artifactory/agent-pipeline-test-local/com/compuware/apm/oneagentpython/oneagentpython-linux-x86_64-release/1.293.0.20240503-060637/oneagentpython-linux-x86_64-release-1.293.0.20240503-060637.zip"
+  python_soft_agent_url: "https://artifactory.lab.dynatrace.org/artifactory/ruxit-cluster-production-local/com/dynatrace/oneagent/python/oneagentpython/1.289.98.20240418-072830/oneagentpython-1.289.98.20240418-072830.zip"

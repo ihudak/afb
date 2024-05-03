@@ -64,6 +64,7 @@ class FitnessSheet:
         if not exercise_type.is_valid():
             return []
         ws_name: str = self.__archive_sheet_name(exercise_type.get_name()) if is_archive else exercise_type.get_name()
+        self.__invalidate_cache(ws_name)
         self.__cache_worksheet(ws_name)
         ws = self.__get_worksheet(ws_name)
         if ws is None:
