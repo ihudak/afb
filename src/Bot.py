@@ -61,7 +61,7 @@ class Bot:
     __max_shoe_size = 46
     __admin_id = 413423581
 
-    def __init__(self, token: str, fitness_sheet: FitnessSheet):
+    def __init__(self, token: str, fitness_sheet: FitnessSheet, admin_id: int):
         self.__fitness_sheet: FitnessSheet = fitness_sheet
         self.__exercise_types: {str, ExerciseType} = {}
         self.__make_exercise_types()

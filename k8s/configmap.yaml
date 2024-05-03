@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: afb-configmap
+  namespace: afb
+data:
+  FITNESS_BOT_SPREADSHEET_URL: "https://docs.google.com/spreadsheets/d/1pe9KsEO1oqhAb0pHY7h-Q9mb_uuz4GtOH-QRNasb1y4/edit#gid=1993409970"
+  FITNESS_BOT_ADMIN: "413423581"
+  FITNESS_BOT_TOKEN: '5702428197:AAER1GzamdsbiotIOzQlgQ2TbHx0nTulJCI'
+  TENANT_ID: "pae32231"
+  TENANT_LAYER: "dev" # dev | sprint
+  dt_srv: "dynatracelabs.com" # dynatracelabs.com | dynatrace.com
+  APP_NAME: "ArmyFitnessBot"
+  SVC_SUFFIX: "azure"
+  SECURITY_CONTEXT: "AFB"
+  COST_CENTER: "FitnessSales"
+  COST_PROJECT: "FitnessBot"
+  MY_ATTR: "ArmyFitnessBot-Attr"
+  python_agent_url: "https://artifactory.lab.dynatrace.org/artifactory/agent-pipeline-test-local/com/compuware/apm/oneagentpython/oneagentpython-linux-x86_64-release/1.293.0.20240503-060637/oneagentpython-linux-x86_64-release-1.293.0.20240503-060637.zip"

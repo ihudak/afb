@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: army-fitness-bot
+  namespace: afb
+  labels:
+    app: army-fitness-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: army-fitness-bot
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: afb
+      labels:
+        app: army-fitness-bot
+        app.kubernetes.io/version: 1.0.0
+        app.kubernetes.io/part-of: ArmyFitnessBot
+    spec:
+      containers:
+        - name: afb
+          image: ivangudak096/afb-x64:latest
+          envFrom:
+            - configMapRef:
+                name: afb-configmap
+            - secretRef:
+                name: afb-secret
+          env:
+            - name: DT_RELEASE_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            - name: DT_RELEASE_BUILD_VERSION
+              value: "2024-04-07-20:03:11"
+            - name: TENANT_URL
+              value: "https://$(TENANT_ID).$(TENANT_LAYER).$(dt_srv)"
+            - name: SERVICE_NAME
+              value: ArmyFitnessBot
+            - name: SERVICE_FULL_NAME
+              value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PROJECT),my.resource.attribute=$(MY_ATTR)"
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 768Mi
+            requests:
+              cpu: 1000m
+              memory: 768Mi
