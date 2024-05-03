@@ -45,6 +45,14 @@ COPY ./requirements.txt .
 ############################################################
 RUN pip install -r ./requirements.txt
 
+ENV python_native_agent_url="https://artifactory.lab.dynatrace.org/artifactory/agent-pipeline-test-local/com/compuware/apm/oneagentpython/oneagentpython-linux-x86_64-release/1.293.0.20240503-060637/oneagentpython-linux-x86_64-release-1.293.0.20240503-060637.zip"
+ENV python_soft_agent_url="https://artifactory.lab.dynatrace.org/artifactory/ruxit-cluster-production-local/com/dynatrace/oneagent/python/oneagentpython/1.289.98.20240418-072830/oneagentpython-1.289.98.20240418-072830.zip"
+ENV python_soft_agent_path="$OA_INSTALL_DIR/agent/bin/1.292.0.20240502-224326/any/python/"
+ENV TENANT_ID=
+ENV TENANT_LAYER=dev
+ENV dt_srv=dynatracelabs.com
+ENV TENANT_URL=
+ENV OA_TOKEN=
 ############################################################
 # Prepare OA. Download Agent
 ############################################################
