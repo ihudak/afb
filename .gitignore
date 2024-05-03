@@ -160,7 +160,7 @@ cython_debug/
 .idea/
 .vscode/settings.json
 virtualenv/
-src/spreadsheet_auth.json
-src/telegram.token
+spreadsheet_auth.json
+telegram.token
 /.run/
 /.vscode/

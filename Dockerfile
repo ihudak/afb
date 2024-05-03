@@ -22,8 +22,8 @@ ENV OA_CONF_FILE=$OA_INSTALL_DIR/agent/conf/standalone.conf
 ENV RUXIT_CONF_FILE=$OA_INSTALL_DIR/agent/conf/ruxitagentproc.conf
 # Python Agent settings
 ENV DT_PYTHON_NATIVE_LIBS_ROOT=$OA_INSTALL_DIR/agent/
-ENV DT_LOGLEVEL_PROC="general=info,hooking=info,pgid=info,hooking=info"
-ENV DT_LOGCON_PROC=stdout
+#ENV DT_LOGLEVEL_PROC="general=none,hooking=none,pgid=none,hooking=none"
+#ENV DT_LOGCON_PROC=stdout
 ENV DT_DEBUGFLAGS="debugAllowCompanionConsoleLog=true,debugCompanionLeaveStdoutOpen=true,debugLogCompanionWorkerNative=true,debugLogCompanionWorkerLifecycleNative=true,debugLogAgentShutdownNative=true"
 # Copy agent installer
 COPY ./scripts/* /opt/
@@ -37,7 +37,7 @@ WORKDIR /opt/bot
 ############################################################
 # copy the project files
 ############################################################
-COPY ./src .
+COPY ./src/* .
 COPY ./requirements.txt .
 
 ############################################################
@@ -45,14 +45,22 @@ COPY ./requirements.txt .
 ############################################################
 RUN pip install -r ./requirements.txt
 
+############################################################
+# Prepare OA. Download Agent
+############################################################
+RUN if [ -n "${TENANT_URL+x}" ] && [ -n "${OA_TOKEN+x}" ]; then \
+      /opt/get_oa.sh ; \
+      /opt/config_oa.sh ; \
+    fi
 
 #ENTRYPOINT ["python", "main.py"]
 ENTRYPOINT export PATH=$PATH:$OA_INSTALL_DIR:$OA_INSTALL_DIR/agent && \
-           if [ -n "${TENANT_URL+x}" ] && [ -n "${OA_TOKEN+x}" ]; then \
-                /opt/get_oa.sh ; \
-                /opt/config_oa.sh ; \
-                LD_PRELOAD=$OA_INSTALL_DIR/agent/lib64/liboneagentproc.so python ./main.py ; \
-           else \
-                python ./main.py ; \
-           fi
-
+    printf %s $GSPREAD_AUTH > ./spreadsheet_auth.json && \
+    sed -iE 's/\",\"/\",\n\ \ \"/g' ./spreadsheet_auth.json && \
+    sed -iE 's/{\"/{\n\ \ \"/g' ./spreadsheet_auth.json && \
+    sed -iE 's/\"}/\"\n}\n/g' ./spreadsheet_auth.json && \
+    sed -iE 's/\":\"/\":\ \"/g' ./spreadsheet_auth.json && \
+    sed -iE 's/-----BEGINPRIVATEKEY-----/-----BEGIN\ PRIVATE\ KEY-----/g' ./spreadsheet_auth.json && \
+    sed -iE 's/-----ENDPRIVATEKEY-----/-----END\ PRIVATE\ KEY-----/g' ./spreadsheet_auth.json && \
+    rm ./spreadsheet_auth.jsonE && \
+    LD_PRELOAD=$OA_INSTALL_DIR/agent/lib64/liboneagentproc.so python ./main.py

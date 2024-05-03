@@ -82,18 +82,18 @@ fi
 
 # Unzip OA
 echo "Upzipping OneAgent"
-cd "$OA_INSTALL_DIR" && unzip "$AGENT_ZIP" # && rm "$AGENT_ZIP"
+cd "$OA_INSTALL_DIR" && unzip "$AGENT_ZIP" && rm "$AGENT_ZIP"
 echo "Detecting the installation path for the Python agent"
-export AGENT_VERSION=$(head -2 "$OA_INSTALL_DIR"/manifest.json | grep version | sed -E s/\"version\":\ \"// | sed s/\",// | sed -E s/\s*//)
+export AGENT_VERSION=$(sed -n 2p "$OA_INSTALL_DIR"/manifest.json | grep version | sed -E s/\"version\":\ \"// | sed s/\",// |  tr -d ' ')
 export PYTHON_AGENT_PATH="$OA_INSTALL_DIR/agent/bin/$AGENT_VERSION/any/python/"
 echo "Agent Version detected: $AGENT_VERSION"
 echo "Python Agent Path: $PYTHON_AGENT_PATH"
 
 echo "Upzipping PythonNativeAgent"
-cd "$OA_INSTALL_DIR"/agent/lib64 && unzip "$PYTHON_NATIVE_AGENT_ZIP" # && rm "$PYTHON_NATIVE_AGENT_ZIP"
+cd "$OA_INSTALL_DIR"/agent/lib64 && unzip "$PYTHON_NATIVE_AGENT_ZIP" && rm "$PYTHON_NATIVE_AGENT_ZIP"
 echo "Upzipping PythonSoftAgent"
 mkdir -p "$PYTHON_AGENT_PATH" && \
-  cd "$PYTHON_AGENT_PATH" && unzip "$PYTHON_SOFT_AGENT_ZIP" # && rm "$PYTHON_SOFT_AGENT_ZIP"
+  cd "$PYTHON_AGENT_PATH" && unzip "$PYTHON_SOFT_AGENT_ZIP" && rm "$PYTHON_SOFT_AGENT_ZIP"
 
 # copy the template of the config file
 cp /opt/standalone.conf "$OA_INSTALL_DIR"/agent/conf/
