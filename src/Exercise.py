@@ -46,6 +46,9 @@ class Exercise:
     def get_free_slots(self) -> int:
         return self.__free_slots
 
+    def has_free_slots(self) -> bool:
+        return self.is_in_future() and self.__free_slots > 0
+
     def set_free_slots(self, slots: int):
         self.__free_slots = slots
 

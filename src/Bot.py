@@ -23,7 +23,8 @@ class BotCache:
         self.__client: Client = client
         self.__workflow: SelectedWorkflow = SelectedWorkflow.NONE
         self.__appointments: list[Appointment] = []
-        self.__new_to_bot = False
+        self.__new_to_bot: bool = False
+        self.__exercise_type: ExerciseType = None
 
     def get_client(self) -> Client:
         return self.__client
@@ -55,6 +56,12 @@ class BotCache:
     def add_appointment(self, appointment: Appointment):
         self.__appointments.append(appointment)
 
+    def get_exercise_type(self) -> ExerciseType:
+        return self.__exercise_type
+
+    def set_exercise_type(self, exercise_type: ExerciseType) -> None:
+        self.__exercise_type = exercise_type
+
 
 class Bot:
     __min_shoe_size = 34
@@ -64,7 +71,6 @@ class Bot:
     def __init__(self, token: str, fitness_sheet: FitnessSheet, admin_id: int):
         self.__fitness_sheet: FitnessSheet = fitness_sheet
         self.__exercise_types: {str, ExerciseType} = {}
-        self.__make_exercise_types()
         self.__bot_cache: {str, BotCache} = {}
 
         self.__bot = telebot.TeleBot(token)
@@ -87,7 +93,6 @@ class Bot:
 
     # Обробник команди /start
     def __send_welcome(self, message):
-        self.__make_exercise_types()
         # Створюємо клавіатуру з кнопками
         keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
         button1 = types.KeyboardButton("🏋️‍♂️ Записатись на групове тренування")
@@ -104,7 +109,6 @@ class Bot:
 
     # Обробник команди /restart
     def __restart(self, message):
-        self.__make_exercise_types()
         self.__set_workflow(message, SelectedWorkflow.NONE)
         self.__reset_client_appointments(message)
         # Відправляємо повідомлення вітання знову
@@ -229,13 +233,13 @@ class Bot:
     def __save_training_type(self, message):
         # Зберігаємо вибраний вид тренування в словнику user_data
         ex_type_name = message.text
-        self.__exercise_type = self.__exercise_types[ex_type_name]
+        self.__set_exercise_type(message=message, exercise_type=self.__exercise_types[ex_type_name])
 
         # Отримуємо розклад для обраного тренування
-        exercises: list[Exercise] = self.__get_exercises()
+        exercises: list[Exercise] = self.__get_exercises(message=message)
         schedule: list[str] = []
         for ex in exercises:
-            if ex.get_free_slots() > 0:
+            if ex.has_free_slots():
                 schedule.append(ex.get_timestamp())
 
         if len(schedule) > 0:
@@ -246,7 +250,8 @@ class Bot:
                 keyboard.add(button)
             self.__bot.reply_to(message, f"Оберіть бажану дату та час тренування {message.text}:", reply_markup=keyboard)
         else:
-            self.__bot.reply_to(message, "На жаль, розклад для обраного тренування відсутній.")
+            self.__bot.reply_to(message, "На жаль, розклад для обраного тренування заповнений.")
+            self.__restart(message=message)
 
     def __query_callback(self, call):
         if self.__get_workflow(call.message) == SelectedWorkflow.CREATE_APPOINTMENT:
@@ -266,7 +271,8 @@ class Bot:
         self.__timestamp = call.data
         client: Client = self.__get_client(call.message)
         foot_size = 0 if client is None else client.get_foot_size()
-        if self.__exercise_type.is_size_foot_required() and foot_size == 0:
+        ex_type: ExerciseType = self.__get_exercise_type(message=call.message)
+        if ex_type is not None and ex_type.is_size_foot_required() and foot_size == 0:
             # Запитуємо розмір взуття лише для тренування KANGOO JUMPS
             self.__bot.send_message(call.message.chat.id, "Будь ласка, введіть свій розмір взуття:", reply_markup=types.ReplyKeyboardRemove())
             # Зберігаємо стан - очікуємо розмір взуття
@@ -296,11 +302,12 @@ class Bot:
             # Продовжуємо запитувати розмір взуття
             self.__bot.register_next_step_handler(message, self.__save_shoe_size)
 
-    def __get_exercises(self) -> list[Exercise]:
-        if self.__exercise_type is None:
+    def __get_exercises(self, message) -> list[Exercise]:
+        ex_type: ExerciseType = self.__get_exercise_type(message=message)
+        if ex_type is None:
             return None
         else:
-            return self.__fitness_sheet.get_exercises(self.__exercise_type)
+            return self.__fitness_sheet.get_available_exercises(ex_type, self.__get_client(message=message))
 
     def __make_appointment(self, message):
         appointment: Appointment = self.__fitness_sheet.make_appointment(self.__create_new_appointment(message))
@@ -343,9 +350,9 @@ class Bot:
         self.__restart(message)
 
     def __create_new_appointment(self, message) -> Appointment:
-        exercises: list[Exercise] = self.__get_exercises()
+        exercises: list[Exercise] = self.__get_exercises(message=message)
         for ex in exercises:
-            if ex.is_right_exercise_for_appointment(self.__exercise_type, self.__timestamp):
+            if ex.is_right_exercise_for_appointment(self.__get_exercise_type(message=message), self.__timestamp):
                 return Appointment(self.__get_client(message), ex)
         return None
 
@@ -452,3 +459,13 @@ class Bot:
             return self.__bot_cache[message.chat.id].get_workflow()
         else:
             return SelectedWorkflow.NONE
+
+    def __get_exercise_type(self, message) -> ExerciseType:
+        if message.chat.id in self.__bot_cache.keys():
+            return self.__bot_cache[message.chat.id].get_exercise_type()
+        else:
+            return None
+
+    def __set_exercise_type(self, message, exercise_type: ExerciseType) -> None:
+        if message.chat.id in self.__bot_cache.keys() and exercise_type is not None:
+            self.__bot_cache[message.chat.id].set_exercise_type(exercise_type=exercise_type)

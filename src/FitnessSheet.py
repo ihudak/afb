@@ -60,6 +60,16 @@ class FitnessSheet:
     def get_exercises(self, exercise_type: ExerciseType) -> list[Exercise]:
         return self.__get_exercises(exercise_type, False)
 
+    def get_available_exercises(self, exercise_type: ExerciseType, client: Client) -> list[Exercise]:
+        exercises: list[Exercise] = self.__get_exercises(exercise_type=exercise_type, is_archive=False)
+        if exercises is None or len(exercises) == 0:
+            return []
+        result: list[Exercise] = []
+        for ex in exercises:
+            if not self.__is_client_already_in_exercise(client=client, exercise=ex, is_archive=False) and ex.has_free_slots():
+                result.append(ex)
+        return result
+
     def __get_exercises(self, exercise_type: ExerciseType, is_archive: bool) -> list[Exercise]:
         if not exercise_type.is_valid():
             return []
