@@ -77,14 +77,14 @@ class Bot:
         self.__welcome_handler = self.__bot.message_handler(commands=['start'])(self.__send_welcome)
         self.__restart_handler = self.__bot.message_handler(commands=['restart'])(self.__restart)
         self.__help_handler = self.__bot.message_handler(commands=['help'])(self.__help_command)
-        self.__contact_handler = self.__bot.message_handler(func=lambda message: message.text == "📞 Контакти")(self.__contact_us)
-        self.__appointments_handler = self.__bot.message_handler(func=lambda message: message.text == "👀 Мої записи")(self.__my_appointments)
-        self.__about_handler = self.__bot.message_handler(func=lambda message: message.text == "ℹ️ Про нас")(self.__about_us)
-        self.__request_usr_data_handler = self.__bot.message_handler(func=lambda message: message.text == "🏋️‍♂️ Записатись на групове тренування")(self.__start_appointment_creation)
+        self.__contact_handler = self.__bot.message_handler(func=lambda message: message.text == "📞 Contacts")(self.__contact_us)
+        self.__appointments_handler = self.__bot.message_handler(func=lambda message: message.text == "👀 My Appointments")(self.__my_appointments)
+        self.__about_handler = self.__bot.message_handler(func=lambda message: message.text == "ℹ️ About Us")(self.__about_us)
+        self.__request_usr_data_handler = self.__bot.message_handler(func=lambda message: message.text == "🏋️‍♂️ Make an Appointment")(self.__start_appointment_creation)
         self.__get_client_data_handler = self.__bot.message_handler(content_types=['contact'])(self.__get_phone_and_create_client)
         self.__save_training_type_handler = self.__bot.message_handler(func=lambda message: message.text in self.__exercise_types.keys())(self.__save_training_type)
         self.__callback_handler = self.__bot.callback_query_handler(func=lambda call: True)(self.__query_callback)
-        self.__delete_appointments = self.__bot.message_handler(func=lambda message: message.text == "❌ Скасувати запис")(self.__delete_my_appointment)
+        self.__delete_appointments = self.__bot.message_handler(func=lambda message: message.text == "❌ Cancel Appointment")(self.__delete_my_appointment)
         self.__feedback_command_handler = self.__bot.message_handler(commands=['feedback'])(self.__feedback_handler)
 
         # Запускаємо бота
@@ -95,16 +95,16 @@ class Bot:
     def __send_welcome(self, message):
         # Створюємо клавіатуру з кнопками
         keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-        button1 = types.KeyboardButton("🏋️‍♂️ Записатись на групове тренування")
-        button2 = types.KeyboardButton("👀 Мої записи")
-        button3 = types.KeyboardButton("❌ Скасувати запис")
-        button4 = types.KeyboardButton("ℹ️ Про нас")
-        button5 = types.KeyboardButton("📞 Контакти")
+        button1 = types.KeyboardButton("🏋️‍♂️ Make an Appointment")
+        button2 = types.KeyboardButton("👀 My Appointments")
+        button3 = types.KeyboardButton("❌ Cancel Appointment")
+        button4 = types.KeyboardButton("ℹ️ About Us")
+        button5 = types.KeyboardButton("📞 Contacts")
         keyboard.add(button1)
         keyboard.add(button2, button3)
         keyboard.add(button4, button5)
         # Вітаємо користувача та надсилаємо клавіатуру з кнопками
-        welcome_message = "Вітаємо у ArmyFitness! Оберіть опцію:"
+        welcome_message = "Welcome to ArmyFitness! Make a choice:"
         self.__bot.reply_to(message, welcome_message, reply_markup=keyboard)
 
     # Обробник команди /restart
@@ -117,7 +117,7 @@ class Bot:
     # Обробник для команди /help
     def __help_command(self, message):
         # Текст повідомлення з контактним номером телефону та смайликом
-        help_text = "Зв'яжись з нами, якщо у тебе виникнуть питання: +380 (68) 685 19 03 📞"
+        help_text = "Contact us should you have any questions: +380 (68) 685 19 03 📞"
         # Відправлення повідомлення з текстом
         self.__bot.reply_to(message, help_text)
 
@@ -132,14 +132,14 @@ class Bot:
             self.__request_user_data(message)
 
     def __get_feedback(self, message):
-        self.__bot.send_message(message.chat.id, "Будь ласка, напишіть відгук:", reply_markup=types.ReplyKeyboardRemove())
+        self.__bot.send_message(message.chat.id, "Please, provide feedback:", reply_markup=types.ReplyKeyboardRemove())
         # Зберігаємо стан - очікуємо відгук
         self.__bot.register_next_step_handler(message, self.__send_feedback_to_admin)
 
     def __send_feedback_to_admin(self, message):
         self.__set_workflow(message, SelectedWorkflow.NONE)
         # Отримання тексту повідомлення від користувача
-        self.__bot.send_message(message.chat.id, "Дякуємо за ваш відгук!")
+        self.__bot.send_message(message.chat.id, "Thank you for the feedback!!")
         self.__admin_notification_feedback(message)
         self.__restart(message)
 
@@ -157,11 +157,11 @@ class Bot:
     # Обробник для кнопки "Контакти 📞"
     def __contact_us(self, message):
         contact_text = (
-            "📞 <b>Контактний номер телефону:</b> \n+380 (68) 685 19 03\n\n"
-            "📍 <b>Знайти нас:</b> Натисніть кнопку, щоб знайти нас на Google Maps: <a href='https://maps.app.goo.gl/qkmrEqqbpF64iNm38'>Відкрити на Google Maps</a>\n\n"
-            "📺 <b>Instagram:</b> Слідкуйте за нами у <a href='https://www.instagram.com/armyfitness.kyiv/'>Instagram</a> і дізнавайтеся про наші останні події та тренування!\n\n"
-            "👤 <b>Facebook:</b> Підписуйтесь на нашу сторінку у <a href='https://www.facebook.com/armyfitnessstudio/'>Facebook</a> та беріть участь у наших спільнотах та акціях!\n\n"
-            "🌐 <b>Сайт:</b> Відвідайте наш <a href='https://w.wlaunch.net/i/armyfitness/b/e62e1248-c4f3-11ee-b6a9-252e06c66558/s'>веб-сайт</a> для детальної інформації про розклад тренувань та послуги студії."
+            "📞 <b>Contact phone number:</b> \n+380 (68) 685 19 03\n\n"
+            "📍 <b>Знайти нас:</b> Click this button to find us on Google Maps: <a href='https://maps.app.goo.gl/qkmrEqqbpF64iNm38'>Open on Google Maps</a>\n\n"
+            "📺 <b>Instagram:</b> Follow us in <a href='https://www.instagram.com/armyfitness.kyiv/'>Instagram</a> and learn about our recent activities and trainings!\n\n"
+            "👤 <b>Facebook:</b> Follow us on <a href='https://www.facebook.com/armyfitnessstudio/'>Facebook</a> and join our activities!\n\n"
+            "🌐 <b>Сайт:</b> Open our <a href='https://w.wlaunch.net/i/armyfitness/b/e62e1248-c4f3-11ee-b6a9-252e06c66558/s'>website</a> to know more about our studio."
         )
 
         self.__bot.reply_to(message, contact_text, parse_mode='HTML')
@@ -192,9 +192,9 @@ class Bot:
     def __request_user_data(self, message):
         # Відправляємо спеціальну кнопку для поділу номера телефону
         keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-        button = types.KeyboardButton(text="Поділитися номером телефону", request_contact=True)
+        button = types.KeyboardButton(text="please, share your contact data", request_contact=True)
         keyboard.add(button)
-        self.__bot.reply_to(message, "Будь ласка, натисніть кнопку нижче, щоб поділитися своїм номером телефону:", reply_markup=keyboard)
+        self.__bot.reply_to(message, "Please, click a button below to share your contact information:", reply_markup=keyboard)
 
     # Обробник для отримання номера телефону
     def __get_phone_and_create_client(self, message):
@@ -222,7 +222,7 @@ class Bot:
             keyboard.add(types.KeyboardButton(et))
 
         # Запитуємо вибір користувача
-        self.__bot.reply_to(message, "Оберіть вид тренування:", reply_markup=keyboard)
+        self.__bot.reply_to(message, "Chose a training:", reply_markup=keyboard)
 
     # Make excersizetypes as a Dictionary
     def __make_exercise_types(self):
@@ -248,9 +248,9 @@ class Bot:
             for item in schedule:
                 button = types.InlineKeyboardButton(text=item, callback_data=item)
                 keyboard.add(button)
-            self.__bot.reply_to(message, f"Оберіть бажану дату та час тренування {message.text}:", reply_markup=keyboard)
+            self.__bot.reply_to(message, f"Chose a date and time {message.text}:", reply_markup=keyboard)
         else:
-            self.__bot.reply_to(message, "На жаль, розклад для обраного тренування заповнений.")
+            self.__bot.reply_to(message, "Sorry, all slots are taken.")
             self.__restart(message=message)
 
     def __query_callback(self, call):
@@ -274,7 +274,7 @@ class Bot:
         ex_type: ExerciseType = self.__get_exercise_type(message=call.message)
         if ex_type is not None and ex_type.is_size_foot_required() and foot_size == 0:
             # Запитуємо розмір взуття лише для тренування KANGOO JUMPS
-            self.__bot.send_message(call.message.chat.id, "Будь ласка, введіть свій розмір взуття:", reply_markup=types.ReplyKeyboardRemove())
+            self.__bot.send_message(call.message.chat.id, "Please, enter your shoe size:", reply_markup=types.ReplyKeyboardRemove())
             # Зберігаємо стан - очікуємо розмір взуття
             self.__bot.register_next_step_handler(call.message, self.__save_shoe_size)
         else:
@@ -293,12 +293,12 @@ class Bot:
                 self.__make_appointment(message)
             else:
                 # Якщо розмір взуття не знаходиться у діапазоні 34-46, повідомляємо користувача
-                self.__bot.reply_to(message, f"Будь ласка, введіть розмір взуття у діапазоні від {self.__min_shoe_size} до {self.__max_shoe_size}.", reply_markup=types.ReplyKeyboardRemove())
+                self.__bot.reply_to(message, f"Please, enter the shoe size between {self.__min_shoe_size} and {self.__max_shoe_size}.", reply_markup=types.ReplyKeyboardRemove())
                 # Продовжуємо запитувати розмір взуття
                 self.__bot.register_next_step_handler(message, self.__save_shoe_size)
         except ValueError:
             # Якщо введений розмір взуття не є цілим числом, повідомляємо користувача про помилку та просимо ввести розмір взуття знову
-            self.__bot.reply_to(message, "Будь ласка, введіть розмір взуття у форматі цілого числа.", reply_markup=types.ReplyKeyboardRemove())
+            self.__bot.reply_to(message, "Please, enter your shoe size as an integer number.", reply_markup=types.ReplyKeyboardRemove())
             # Продовжуємо запитувати розмір взуття
             self.__bot.register_next_step_handler(message, self.__save_shoe_size)
 
@@ -312,7 +312,7 @@ class Bot:
     def __make_appointment(self, message):
         appointment: Appointment = self.__fitness_sheet.make_appointment(self.__create_new_appointment(message))
         if appointment is None:
-            final_message = "Помилка запису на курс"
+            final_message = "Failed to make an appointment"
             self.__bot.send_message(message.chat.id, final_message)
         else:
             self.__send_final_message(message, appointment)
@@ -324,21 +324,21 @@ class Bot:
         google_maps_link = "https://maps.app.goo.gl/qkmrEqqbpF64iNm38"
         final_message: str = ""
         if appointment.get_status() == Appointment.Status.SUCCESS:
-            final_message = f"Дякуємо за запис, {appointment.get_client().get_first_name()}! 🎉\n"
-            final_message += f"Чекаємо на тренуванні з {appointment.get_exercise().get_type().get_name()}! 💪🏼 \n\n"
-            final_message += f"🗓️ Дата та час тренування: {appointment.get_exercise().get_timestamp()}. \n"
-            final_message += f"📍 Місце зустрічі: {google_maps_link} \n"
-            final_message += "📞 Контактний номер телефону: +380 (68) 685 19 03"
+            final_message = f"Thank you for making an appointment, {appointment.get_client().get_first_name()}! 🎉\n"
+            final_message += f"Looking forward to seeing you at {appointment.get_exercise().get_type().get_name()}! 💪🏼 \n\n"
+            final_message += f"🗓️ Date and time: {appointment.get_exercise().get_timestamp()}. \n"
+            final_message += f"📍 Location: {google_maps_link} \n"
+            final_message += "📞 Phone number: +380 (68) 685 19 03"
         elif appointment.get_status() == Appointment.Status.GROUPFULL:
-            final_message = f"Вибачте, {appointment.get_client().get_first_name()}. Група повністю сформована. Оберіть інший час"
+            final_message = f"Sorry, {appointment.get_client().get_first_name()}. All slots are taken. Please chose another time"
         elif appointment.get_status() == Appointment.Status.NOTFOUND:
-            final_message = f"Вибачте, {appointment.get_client().get_first_name()}. заняття не знайдено"
+            final_message = f"Sorry, {appointment.get_client().get_first_name()}. Training not found"
         elif appointment.get_status() == Appointment.Status.ALREADY_ADDED:
-            final_message = f"{appointment.get_client().get_first_name()}, ви вже зареєстровані на обраному занятті"
+            final_message = f"{appointment.get_client().get_first_name()}, you are already registered for this training"
         elif appointment.get_status() == Appointment.Status.EXERCISE_IN_PAST:
-            final_message = f"{appointment.get_client().get_first_name()}, нажаль, це заняття вже минуло"
+            final_message = f"{appointment.get_client().get_first_name()}, sorry, this training is already in the past"
         else:
-            final_message = "Помилка запису на курс"
+            final_message = "Failed to make an appointment"
 
         if appointment.get_client().is_created():
             self.__admin_notification_new_client(message)
@@ -375,16 +375,16 @@ class Bot:
                 button = types.InlineKeyboardButton(text=str(appointment), callback_data=str(appointment))
                 keyboard.add(button)
             if self.__get_workflow(message) == SelectedWorkflow.DELETE_APPOINTMENT:
-                final_message = "Оберіть тренування, яке хочете видалити:"
+                final_message = "Chose the appointment you want to cancel:"
             elif self.__get_workflow(message) == SelectedWorkflow.GET_APPOINTMENTS:
-                final_message = "Ось розклад Ваших тренувань:"
+                final_message = "Here are your appointments:"
             else:
                 self.__restart(message)
                 return
         else:
-            final_message = "Нажаль, тренування відсутні."
+            final_message = "No appointments made yet."
 
-        button = types.InlineKeyboardButton(text="Назад", callback_data="Назад")
+        button = types.InlineKeyboardButton(text="Back", callback_data="Back")
         keyboard.add(button)
         self.__bot.reply_to(message, final_message, reply_markup=keyboard)
         if self.__bot_cache[message.chat.id].is_new_to_bot() and self.__get_workflow(message) != SelectedWorkflow.DELETE_APPOINTMENT:
@@ -400,16 +400,16 @@ class Bot:
     def __delete_appointment(self, call):
         final_message: str = ""
         appointments: list[Appointment] = self.__get_client_appointments(call.message)
-        final_message = "Тренування не знайдено. Скасування не можливе."
+        final_message = "Appointment not found. Cannot cancel."
         if appointments is not None and len(appointments) > 0:
             for appointment in appointments:
                 if str(appointment) == call.data:
                     if self.__fitness_sheet.delete_appointment(appointment):
                         self.__admint_notifications_appointment_deleted(appointment)
-                        final_message = f"Тренування скасовано: {str(appointment)}"
+                        final_message = f"Appointment canceled: {str(appointment)}"
         self.__reset_client_appointments(call.message)
         self.__set_workflow(call.message, SelectedWorkflow.NONE)
-        if call.data != "Назад":
+        if call.data != "Back":
             self.__bot.send_message(chat_id=call.message.chat.id, text=final_message)
         self.__restart(call.message)
 
@@ -426,7 +426,7 @@ class Bot:
 
     def __admin_notification_feedback(self, message):
         # Відправлення повідомлення з відгуком адміністратору
-        self.__bot.send_message(chat_id=self.__admin_id, text=f"Новий відгук від {self.__get_client(message).get_first_name()}: {message.text}")
+        self.__bot.send_message(chat_id=self.__admin_id, text=f"new feedback from {self.__get_client(message).get_first_name()}: {message.text}")
 
     def __cache_appointments(self, message, appointments: list[Appointment]):
         bot_cache: BotCache = None if message.chat.id not in self.__bot_cache.keys() else self.__bot_cache[message.chat.id]
